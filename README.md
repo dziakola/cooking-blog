@@ -1,1 +1,1 @@
-# cooking-blog
+# kitchen-blog
