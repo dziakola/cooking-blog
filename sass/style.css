@@ -77,6 +77,11 @@ body {
 
 .list-horizontal li {
   display: inline-block;
+  margin: 5px;
+}
+
+.post-tags ul li {
+  margin: 5px;
 }
 
 /* Authors */
