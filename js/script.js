@@ -3,7 +3,12 @@ const optArticleSelector = ".post",
   optTitleSelector = ".post-title",
   optTitleListSelector = ".titles",
   optArticleTagSelector = ".post-tags .list",
-  optArticleAuthorsSelector = ".post .post-author";
+  optArticleAuthorsSelector = ".post .post-author",
+  //lista tagów w prawej kolumnie
+  optTagsListSelector = ".sidebar .tags",
+  optCloudClassCount = 4,
+  optCloudClassPrefix = "tag-size-",
+  optRightColumnAuthorsSelector = ".sidebar .authors";
 generateTitleLinks();
 
 function titleClickHandler(event) {
@@ -57,8 +62,30 @@ function generateTitleLinks(customSelector = "") {
     link.addEventListener("click", titleClickHandler);
   }
 }
+//zwraca najmniejszą i największą ilość tagów, w obiekcie
+function calculateTagsParams(tags) {
+  const params = { max: 1, min: 9999 };
+  for (let tag in tags) {
+    if (tags[tag] > params.max) {
+      params.max = tags[tag];
+    } else if (tags[tag] < params.min) {
+      params.min = tags[tag];
+    }
+  }
+  return params;
+}
+//porównuje liczbe wystąpień taga z największą i najmniejszą ilością wszystkich tagów
+function calculateTagClass(count, params) {
+  const normalizedCount = count - params.min;
+  const normalizedMax = params.max - params.min;
+  const percentage = normalizedCount / normalizedMax;
+  const classNumber = Math.floor(percentage * (optCloudClassCount - 1) + 1);
+  return optCloudClassPrefix + classNumber;
+}
 /*generowanie tagów*/
 function generateTags() {
+  /* [NEW] create a new variable allTags with an empty object */
+  let allTags = {};
   const allArticles = document.querySelectorAll(optArticleSelector);
   for (let article of allArticles) {
     /* find tags wrapper */
@@ -70,11 +97,35 @@ function generateTags() {
     const articleTagsArray = articleTags.split(" ");
 
     for (let tag of articleTagsArray) {
-      html = html + `<li><a href="#tag-${tag}">${tag}</a></li>`;
+      const linkHTML = `<li><a href="#tag-${tag}">${tag}</a></li>`;
+      html = html + linkHTML;
+      /* [NEW] check if this link is NOT already in allTags*/
+      if (!allTags.hasOwnProperty(tag)) {
+        /* [NEW] add generated code to allTags object */
+        allTags[tag] = 1;
+      } else {
+        allTags[tag]++;
+      }
     }
     /*filling tags wrapper*/
     listTag.innerHTML = html;
   }
+  /* [NEW] find list of tags in right column */
+  const tagList = document.querySelector(optTagsListSelector);
+  /* [NEW] add html from allTags to tagList */
+  //tagList.innerHTML = allTags.join(" ");
+  const tagsParams = calculateTagsParams(allTags);
+  console.log("tagsParams:", tagsParams);
+  //all links HTML code
+  let allTagsHTML = "";
+  //for each tag in allTags
+  for (let tag in allTags) {
+    allTagsHTML += `<li><a class='${calculateTagClass(
+      allTags[tag],
+      tagsParams
+    )}' href="#tag-${tag}">${tag}</a></li>`;
+  }
+  tagList.innerHTML = allTagsHTML;
 }
 
 generateTags();
@@ -111,24 +162,52 @@ function tagClickHandler(event) {
 function addClickListenersToTags() {
   /* find all links to tags */
   const allListTags = document.querySelectorAll(".post-tags li a");
+  const allListTagsRight = document.querySelectorAll(".sidebar .tags li a");
   for (let linkTag of allListTags) {
     linkTag.addEventListener("click", tagClickHandler);
+  }
+  for (let linkTagRight of allListTagsRight) {
+    linkTagRight.addEventListener("click", tagClickHandler);
   }
 }
 
 addClickListenersToTags();
 
 function generateAuthors() {
+  /*obiekt autorzy i liczba ich artykułów*/
+  const objAuthors = {};
   /*wszystkie artykuły*/
   const allArticles = document.querySelectorAll(optArticleSelector);
+  const articleAuthorList = [];
+  const listAuthorsRight = document.querySelector(
+    optRightColumnAuthorsSelector
+  );
   for (let article of allArticles) {
-    /*paragraf z autorem danego artykułu*/
+    /*autor artykułu w kolumnie środkowej selector*/
     const listAuthors = article.querySelector(optArticleAuthorsSelector);
+    /*autor artykułu w kolumnie prawej selector*/
+
     /*wrapper z autorem danego artykułu*/
     const articleAuthor = article.getAttribute("data-author");
+    /*stworzenie tablicy z autorami artykułów*/
+    articleAuthorList.push(articleAuthor);
     /*uzupełnianie jednego paragrafu przy każdym obrocie pętli*/
     listAuthors.innerHTML = `<a href="#author-${articleAuthor}">${articleAuthor}</a>`;
   }
+
+  /*tworzenie obiektu z listą autorów i liczbą ich artykułów*/
+  for (let author of articleAuthorList) {
+    if (!objAuthors.hasOwnProperty(author)) {
+      objAuthors[author] = 1;
+    } else {
+      objAuthors[author]++;
+    }
+  }
+  let html = "";
+  for (let author in objAuthors) {
+    html += `<li><a href="#author-${author}">${author} (${objAuthors[author]})</a></li>`;
+  }
+  listAuthorsRight.innerHTML = html;
 }
 generateAuthors();
 
@@ -156,7 +235,11 @@ function authorClickHandler(event) {
 
 function addClickListenersToAuthors() {
   const allLinkAuthors = document.querySelectorAll(".post .post-author a");
+  const allLinkAuthorsRight = document.querySelectorAll(".sidebar .authors a");
   for (let linkAuthor of allLinkAuthors) {
+    linkAuthor.addEventListener("click", authorClickHandler);
+  }
+  for (let linkAuthor of allLinkAuthorsRight) {
     linkAuthor.addEventListener("click", authorClickHandler);
   }
 }

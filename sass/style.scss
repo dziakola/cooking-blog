@@ -94,13 +94,6 @@ body {
     margin: 5px;
   }
 }
-.post-tags {
-  ul {
-    li {
-      margin: 5px;
-    }
-  }
-}
 
 /* Authors */
 
@@ -128,4 +121,25 @@ body {
   p {
     margin: 0 10px 0 0;
   }
+}
+.post-tags {
+  ul {
+    li {
+      margin-top: 0;
+      margin-right: 5px;
+      font-size: 16px;
+    }
+  }
+}
+.tag-size-1 {
+  font-size: 14px;
+}
+.tag-size-2 {
+  font-size: 16px;
+}
+.tag-size-3 {
+  font-size: 20px;
+}
+.tag-size-4 {
+  font-size: 24px;
 }
