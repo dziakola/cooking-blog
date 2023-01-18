@@ -124,4 +124,10 @@ body {
 
 .tag-size-4 {
   font-size: 24px;
-}/*# sourceMappingURL=style.css.map */
+}
+
+.sidebar .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+} /*# sourceMappingURL=style.css.map */
